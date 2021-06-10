@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_painter/utilities/constants.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'package:image/image.dart' as image;
 
 import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -84,7 +87,9 @@ class _LoadPhotoScreenState extends State<LoadPhotoScreen> {
               },
               child: new CustomPaint(
                   painter: new SignaturePainter(
-                      allPoints: allOffsets, points: _points)),
+                      background: _image,
+                      allPoints: allOffsets,
+                      points: _points)),
             ),
           ),
           Row(
@@ -111,13 +116,20 @@ class _LoadPhotoScreenState extends State<LoadPhotoScreen> {
     );
     if (pickedFile != null) {
       _imageFile = File(pickedFile.path);
-      _image = Image.file(_imageFile!) as ui.Image;
-      // pictureRecorder = ui.PictureRecorder();
+      final ui.Image image = await loadImage(_imageFile!.readAsBytesSync());
+      _image = image;
       setState(() {
-        // _image = _image;
         print('loaded image');
       });
     }
+  }
+
+  Future<ui.Image> loadImage(List<int> img) async {
+    final Completer<ui.Image> imageCompleter = new Completer();
+    ui.decodeImageFromList(Uint8List.fromList(img), (ui.Image img) {
+      imageCompleter.complete(img);
+    });
+    return imageCompleter.future;
   }
 
   void undo() {

@@ -1,22 +1,28 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 class SignaturePainter extends CustomPainter {
-  SignaturePainter({required this.allPoints, required this.points});
+  SignaturePainter(
+      {this.background, required this.allPoints, required this.points});
   final List<Offset> points;
   final List<List<Offset>> allPoints;
+  ui.Image? background;
 
+  @override
   void paint(Canvas canvas, Size size) {
+    if (background != null) {
+      final imageSize =
+          Size(background!.width.toDouble(), background!.height.toDouble());
+      final src = Offset.zero & imageSize;
+      final dst = Offset.zero & size;
+      canvas.drawImageRect(background!, src, dst, Paint());
+      canvas.drawImage(background!, Offset.zero, Paint());
+    }
     Paint paintLine = new Paint()
       ..color = Colors.black
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 5.0;
-    // for (int i = 0; i < points.length - 1; i++) {
-    //   // if (points[i] != null && points[i + 1] != null)
-    //   // canvas.drawLine(points[i], points[i + 1], paint);
-    //   canvas.drawCircle(points[i], 5.0, paintLine);
-    // }
 
     for (var offset1 in allPoints) {
       for (int i = 0; i < offset1.length; i++) {
