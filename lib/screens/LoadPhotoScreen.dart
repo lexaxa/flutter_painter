@@ -17,12 +17,15 @@ import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/container.dart';
 
 import 'package:flutter_painter/utilities/SignaturePainter.dart';
+import 'package:path_provider/path_provider.dart';
 
 class LoadPhotoScreen extends StatefulWidget {
   _LoadPhotoScreenState createState() => _LoadPhotoScreenState();
 }
 
 class _LoadPhotoScreenState extends State<LoadPhotoScreen> {
+  GlobalKey<_LoadPhotoScreenState> key = GlobalKey();
+
   File? _imageFile;
 
   Offset offsetTap = Offset.zero;
@@ -152,33 +155,41 @@ class _LoadPhotoScreenState extends State<LoadPhotoScreen> {
     allOffsets.clear();
   }
 
-  void save() async {
-    isNeedSaveImage = true;
+  Future<ui.Image> get rendered {
     ui.PictureRecorder recorder = ui.PictureRecorder();
     Canvas canvas = Canvas(recorder);
-    SignaturePainter painter =
-        SignaturePainter(allPoints: allOffsets, points: _points);
+    SignaturePainter painter = SignaturePainter(
+        background: _image, allPoints: allOffsets, points: _points);
     var size = context.size;
     painter.paint(canvas, size!);
-    Future<ui.Image> savedImage = recorder
+    return recorder
         .endRecording()
         .toImage(size.width.floor(), size.height.floor());
+  }
 
-    Image img;
-    File file;
-    // String dir = (await getApplicationDocumentsDirectory()).path;
+  void save() async {
+    isNeedSaveImage = true;
 
-    // Directory appDir = await getApplicationDocumentsDirectory();
-    // // Gets the part of path after the last separator.
-    // //final fileName = appDir.basename(_imageFile?.path);
-    // final savedImage1 = await _imageFile!.copy('${appDir.path}/fileName.jpg');
-
-    String fullPath = '/abc.png'; //'''$dir/abc.png';
-    savedImage.then((value) {
-      file = File(fullPath);
-      file.writeAsBytes(base64.decode(value.toString()));
+    ui.Image renderedImage = await rendered;
+    var image;
+    setState(() {
+      image = renderedImage;
     });
 
-    print("saved ${savedImage.toString()}");
+    var pngBytes = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    String dir = await _localPath;
+
+    print("dir=$dir");
+    String fullPath = '$dir/painter_${DateTime.now()}.png';
+
+    File(fullPath).writeAsBytes(pngBytes.buffer.asInt8List());
+    print("saved ");
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
   }
 }
