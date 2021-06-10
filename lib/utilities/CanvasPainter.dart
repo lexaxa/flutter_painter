@@ -2,10 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-class SignaturePainter extends CustomPainter {
-  SignaturePainter(
-      {this.background, required this.allPoints, required this.points});
-  final List<Offset> points;
+class CanvasPainter extends CustomPainter {
+  CanvasPainter({this.background, required this.allPoints});
   final List<List<Offset>> allPoints;
   ui.Image? background;
 
@@ -17,7 +15,6 @@ class SignaturePainter extends CustomPainter {
       final src = Offset.zero & imageSize;
       final dst = Offset.zero & size;
       canvas.drawImageRect(background!, src, dst, Paint());
-      canvas.drawImage(background!, Offset.zero, Paint());
     }
     Paint paintLine = new Paint()
       ..color = Colors.black
@@ -31,5 +28,6 @@ class SignaturePainter extends CustomPainter {
     }
   }
 
-  bool shouldRepaint(SignaturePainter other) => true; //other.points != points;
+  bool shouldRepaint(CanvasPainter other) =>
+      true; //other.allPoints != allPoints;
 }

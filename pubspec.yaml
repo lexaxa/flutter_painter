@@ -31,6 +31,7 @@ dependencies:
   path_provider: ^2.0.2
   image_gallery_saver: ^1.6.9
   # end
+  permission_handler: ^8.0.1
   image: ^3.0.2
 
 dev_dependencies:
